@@ -124,8 +124,9 @@ void MyHero::slotGameTimer()
 {
     QList<QGraphicsItem *> foundItems = this->collidingItems();
     foreach (QGraphicsItem *item, foundItems) {
-        if (item->type() == Barrier::typeBarrier)
+        if (item->type() == Barrier::typeBarrier) {
             damage(QRandomGenerator::global()->bounded(30,40));
+        }
     }
 
     QLineF lineDirection(QPointF(-5, 12), mapFromScene(direction));
@@ -149,6 +150,8 @@ void MyHero::slotGameTimer()
             setRotation(rotation() - (angleDirection - TwoPi )* (-180) /Pi);
         }
     }
+
+    emit signalChangePos(pos());
 }
 
 void MyHero::slotBulletTimer()
@@ -186,6 +189,8 @@ void MyHero::damage(int dmg)
         this->deleteLater();
         QPoint point = QPoint(this->pos().x() + 10, this->pos().y() + 10);
         scene()->addItem(new TargetDestroy(point));
+
+        emit signalGameOver();
     }
     this->update(QRectF(-20,-20,40,40));
 

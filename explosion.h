@@ -15,7 +15,7 @@ public:
     explicit Explosion(QPointF point, QObject* parent = nullptr);
     ~Explosion();
 
-    enum { typeExplosion = UserType + 2 };
+    enum { typeExplosion = UserType + 5 };
 
     int type() const override;
 

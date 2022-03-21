@@ -3,6 +3,9 @@
 #include <QDebug>
 #include "explosion.h"
 #include "targetdestroy.h"
+#include "myhero.h"
+#include "target.h"
+#include <QRandomGenerator>
 
 static const double Pi = 3.14159265358979323846264338327950288419717;
 static double TwoPi = 2.0 * Pi;
@@ -16,13 +19,17 @@ static qreal normalizeRad(qreal angle)
     return angle;
 }
 
-Bullet::Bullet(QPointF start, QPointF end,  QGraphicsItem* hero, QObject* parent)
+Bullet::Bullet(QPointF start, QPointF end,  const int& heroType, QObject* parent)
     : QObject(parent), QGraphicsItem()
 {
     this->setRotation(0);
+    if(heroType == MyHero::typeMyHero)
+        speed = 20;
+    else
+        speed = 10;
+    this->heroType = heroType;
+    this->start = start;
     this->setPos(start);
-    speed = 20;
-    this->hero = hero;
 
     QLineF lineToTarget(start, end);
 
@@ -73,20 +80,45 @@ QPainterPath Bullet::shape() const
     return path;
 }
 
+QPointF Bullet::getStart() const
+{
+    return start;
+}
+
+int Bullet::getHeroType() const
+{
+    return heroType;
+}
+
 void Bullet::slotTimerBullet()
 {
     setPos(mapToParent(0, -speed));
 
-    QPolygonF polygon = QPolygonF()<< mapToScene(-1, -1)
-                                   << mapToScene(-1, 2)<< mapToScene(2, 2) << mapToScene(2, -1);
-    QList<QGraphicsItem *> foundItems = scene()->items(polygon);
-
+    QList<QGraphicsItem *> foundItems = this->collidingItems();
     foreach (QGraphicsItem *item, foundItems) {
-        if (item == this || item == hero || item->type() == Explosion::typeExplosion || item->type() == TargetDestroy::typeDestroy)
+        if (item == this || item->type() == heroType ||
+                item->type() == Explosion::typeExplosion || item->type() == TargetDestroy::typeDestroy)
             continue;
-        scene()->addItem(new Explosion(this->pos()));
-        callbackFunc(item);
-        this->deleteLater();
+
+        if(heroType == MyHero::typeMyHero){
+            QPoint point = QPoint(this->pos().x() + 12, this->pos().y() + 12);
+            scene()->addItem(new Explosion(point));
+            callbackFunc(item);
+            this->deleteLater();
+
+            emit signalTargetShot(item);
+        }
+        else if (heroType == Target::typeTarget) {
+            if(item->type() == Target::typeTarget)
+                continue;
+            QPoint point = QPoint(this->pos().x() + 12, this->pos().y() + 12);
+            scene()->addItem(new Explosion(point));
+            if(item->type() == MyHero::typeMyHero) {
+                MyHero *h = qgraphicsitem_cast <MyHero *> (item);
+                h->damage(QRandomGenerator::global()->bounded(1,5));
+            }
+            this->deleteLater();
+        }
     }
 
     if(this->x() < 20){
@@ -106,4 +138,8 @@ void Bullet::slotTimerBullet()
 void Bullet::setCallbackFunc(void (*func)(QGraphicsItem *))
 {
     callbackFunc = func;
+}
+
+int Bullet::type() const {
+    return typeBullet;
 }

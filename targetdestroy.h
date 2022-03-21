@@ -15,7 +15,7 @@ public:
     explicit TargetDestroy(QPointF point, QObject* parent = nullptr);
     ~TargetDestroy();
 
-    enum { typeDestroy = UserType + 3 };
+    enum { typeDestroy = UserType + 6 };
 
     int type() const override;
 

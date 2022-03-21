@@ -12,10 +12,16 @@ class Bullet : public QObject, public QGraphicsItem
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
 public:
+    enum { typeBullet = UserType + 3 };
+    int type() const override;
 
-    explicit Bullet(QPointF start, QPointF end, QGraphicsItem* hero, QObject* parent = nullptr);
+    explicit Bullet(QPointF start, QPointF end, const int& heroType, QObject* parent = nullptr);
     ~Bullet();
     void setCallbackFunc(void (*func) (QGraphicsItem * item));
+
+    int getHeroType() const;
+
+    QPointF getStart() const;
 
 signals:
     void signalTargetShot(QGraphicsItem* item);
@@ -30,7 +36,8 @@ private:
 private:
     QTimer *timerBullet;
     int speed;
-    QGraphicsItem *hero;
+    int heroType;
+    QPointF start;
 
 private slots:
     void slotTimerBullet();

@@ -12,15 +12,17 @@ class MyHero : public QObject, public QGraphicsItem
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
 public:
+
+    int type() const override;
+
     explicit MyHero(QObject* parent = nullptr);
     ~MyHero();
 
     enum { typeMyHero = UserType + 1 };
 
     int getSpeed() const;
-    int type() const override;
     void damage(int dmg);
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 
     int getHealth() const;
 
@@ -32,6 +34,8 @@ private:
 signals:
     void signalBullet(QPointF start, QPointF end);
     void signalDamage();
+    void signalGameOver();
+    void signalChangePos(QPointF pos);
 
 public slots:
     void slotDirection(QPointF point);

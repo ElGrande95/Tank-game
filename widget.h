@@ -28,11 +28,20 @@ private:
     MyHero* hero;
     Barrier* barrier;
 
+    QTimer* timerEnemyBullet;
+    QTimer* timerEnemyCreate;
+
     static QList<QGraphicsItem *> targets;
 
     static void damageTarget(QGraphicsItem* item);
+    static void nista(QGraphicsItem* item);
 
 private slots:
-    void slotBullet(QPointF start, QPointF end);
+    void slotHeroBullet(QPointF start, QPointF end);
+    void slotEnemyBullet();
+    void slotEnemysFire(QPointF point);
+    void slotEnemyCreate();
+    void slotGameOver();
+
 };
 #endif // WIDGET_H

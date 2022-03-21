@@ -15,6 +15,11 @@ public:
     explicit StartPage(QWidget *parent = nullptr);
     ~StartPage();
 
+private slots:
+    void on_startButton_clicked();
+
+    void on_exitButton_clicked();
+
 private:
     Ui::StartPage *ui;
 };

@@ -1,5 +1,6 @@
 #include "barrier.h"
 #include "myhero.h"
+#include "target.h"
 
 Barrier::Barrier(QObject *parent)
     : QObject(parent), QGraphicsItem()
@@ -44,12 +45,12 @@ void Barrier::slotBarrier()
 {
     QList<QGraphicsItem *> foundItems = this->collidingItems();
     foreach (QGraphicsItem *item, foundItems) {
-        if (item->type() == MyHero::typeMyHero)
+        if (item->type() == MyHero::typeMyHero || item->type() == Target::typeTarget)
             directionDown = !directionDown;
     }
 
 
-    if(mapToParent(x(),y()).y() == 500)
+    if(mapToParent(x(),y()).y() == 900)
         directionDown = false;
     else if(mapToParent(x(),y()).y() == 120)
         directionDown = true;
