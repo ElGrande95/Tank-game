@@ -1,6 +1,6 @@
 #include "startpage.h"
 #include "ui_startpage.h"
-
+#include <QDebug>
 #include "widget.h"
 
 StartPage::StartPage(QWidget *parent) :

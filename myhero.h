@@ -22,9 +22,10 @@ public:
 
     int getSpeed() const;
     void damage(int dmg);
-    void keyPressEvent(QKeyEvent *event) override;
 
     int getHealth() const;
+
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QRectF boundingRect() const override;
@@ -54,7 +55,6 @@ private:
 
     int health;
     int maxHealth;
-
 };
 
 #endif // MYHERO_H

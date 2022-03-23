@@ -1,9 +1,9 @@
 QT       += core gui
+QT += sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
-
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -12,6 +12,8 @@ SOURCES += \
     barrier.cpp \
     bullet.cpp \
     explosion.cpp \
+    gameover.cpp \
+    highscore.cpp \
     main.cpp \
     myhero.cpp \
     myscene.cpp \
@@ -24,6 +26,8 @@ HEADERS += \
     barrier.h \
     bullet.h \
     explosion.h \
+    gameover.h \
+    highscore.h \
     myhero.h \
     myscene.h \
     startpage.h \
@@ -32,6 +36,7 @@ HEADERS += \
     widget.h
 
 FORMS += \
+    gameover.ui \
     startpage.ui \
     widget.ui
 

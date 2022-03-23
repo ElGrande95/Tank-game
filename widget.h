@@ -7,6 +7,8 @@
 #include <QGraphicsScene>
 #include <bullet.h>
 #include "barrier.h"
+#include "target.h"
+#include <QElapsedTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -20,13 +22,22 @@ public:
     explicit Widget(QWidget *parent = nullptr);
     ~Widget();
 
-    void setLabel();
+    void setLabelHealth();
+    void setLabelDestroyed();
+
+    //    void keyPressEvent(QKeyEvent *event) override;
+
+signals:
+    void signalDestroy();
 
 private:
     Ui::Widget *ui;
     MyScene* scene;
     MyHero* hero;
     Barrier* barrier;
+    int enemyDestroy;
+
+    QElapsedTimer timerElapsed;
 
     QTimer* timerEnemyBullet;
     QTimer* timerEnemyCreate;

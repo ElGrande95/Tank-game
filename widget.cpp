@@ -2,12 +2,23 @@
 #include "ui_widget.h"
 #include <QtMath>
 #include <QDebug>
-#include "target.h"
 #include <QRandomGenerator>
 #include <QFont>
+#include <QMessageBox>
+#include "gameover.h"
+#include "highscore.h"
 
 #define Pi 3.14159265358979323846264338327950288419717
 #define TwoPi (2.0 * Pi)
+
+//static qreal normalizeAngleDeg(qreal angle)
+//{
+//    while (angle < 0)
+//        angle += 360;
+//    while (angle >= 360)
+//        angle -= 360;
+//    return angle;
+//}
 
 QList<QGraphicsItem *> Widget::targets;
 
@@ -18,18 +29,18 @@ Widget::Widget(QWidget *parent)
 {
     this->resize(600,600);
     this->setFixedSize(600,600);
-    
+
+    enemyDestroy = 0;
     ui->setupUi(this);
-    
     scene = new MyScene();
-    
-    ui->graphicsView->setScene(scene);  /// set scene into graphicsView
+    ui->graphicsView->setScene(scene);
     ui->graphicsView->setRenderHint(QPainter::Antialiasing);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     
     scene->setSceneRect(0,0,500,500);
-    
+    scene->setFocus();
+
     scene->addRect(0,0,500,20,QPen(Qt::NoPen),QBrush(Qt::darkGray));
     scene->addRect(0,0,20,500,QPen(Qt::NoPen),QBrush(Qt::darkGray));
     scene->addRect(0,480,500,20,QPen(Qt::NoPen),QBrush(Qt::darkGray));
@@ -47,7 +58,7 @@ Widget::Widget(QWidget *parent)
     scene->addItem(hero);
     hero->setFlag(QGraphicsItem::ItemIsFocusable);
     hero->setFocus();
-    
+
     ui->graphicsView->setMouseTracking(true);
     
     connect(scene, &MyScene::signalTargetCoordinate, hero, &MyHero::slotDirection);
@@ -69,9 +80,11 @@ Widget::Widget(QWidget *parent)
     connect(timerEnemyCreate, &QTimer::timeout, this, &Widget::slotEnemyCreate);
     timerEnemyCreate->start(3000);
 
-    setLabel();
-    connect(hero, &MyHero::signalDamage,this, &Widget::setLabel);
-    
+    setLabelDestroyed();
+
+    setLabelHealth();
+    connect(hero, &MyHero::signalDamage,this, &Widget::setLabelHealth);
+
     timerEnemyBullet = new QTimer();
     connect(timerEnemyBullet, &QTimer::timeout, this, &Widget::slotEnemyBullet);
     timerEnemyBullet->start(200);
@@ -79,6 +92,7 @@ Widget::Widget(QWidget *parent)
     connect(hero, &MyHero::signalChangePos, this, &Widget::slotEnemysFire);
     connect(hero, &MyHero::signalGameOver, this, &Widget::slotGameOver);
 
+    timerElapsed.start();
 }
 
 Widget::~Widget()
@@ -86,13 +100,20 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::setLabel()
+void Widget::setLabelHealth()
 {
     QFont f = QFont();
     f.setPixelSize(32);
     ui->health->setFont(f);
     ui->health->setText("Health: " +QString::number((hero->getHealth())));
-    
+}
+
+void Widget::setLabelDestroyed()
+{
+    QFont f = QFont();
+    f.setPixelSize(32);
+    ui->enemyDestroy->setFont(f);
+    ui->enemyDestroy->setText("Destroyed: " +QString::number(enemyDestroy));
 }
 
 void Widget::slotHeroBullet(QPointF start, QPointF end)
@@ -117,6 +138,9 @@ void Widget::slotEnemyBullet()
         Bullet *bullet = new Bullet(QPointF(xStart, yStart), QPointF(xEnd, yEnd), t->type());
         bullet->setCallbackFunc(nista);
         scene->addItem(bullet);
+
+        enemyDestroy = t->getEnemyDestroyed();
+        setLabelDestroyed();
     }
 }
 
@@ -124,38 +148,37 @@ void Widget::slotEnemysFire(QPointF point)
 {
 
     foreach(QGraphicsItem *targ, targets) {
-        Target *tar = qgraphicsitem_cast <Target *> (targ);
+        Target *t = qgraphicsitem_cast <Target *> (targ);
 
-        if(!tar->getMove())
+        if(!t->getMove())
         {
-            foreach(QGraphicsItem *targ, targets) {
-                Target *t = qgraphicsitem_cast <Target *> (targ);
-                t->setMove(false);
-                QLineF lineDirection(t->pos(), point);
-                qreal angleDirection = ::acos(lineDirection.dx() / lineDirection.length());
+            QLineF lineDirection(t->pos(), point);
+            qreal angleDirection = ::acos(lineDirection.dx() / lineDirection.length());
 
-                if(lineDirection.dy() <= 0) {
-                    if(angleDirection < Pi / 2)
-                    {
-                        t->setRotation(90 - angleDirection * 180 /Pi);
-                    }
-                    else if (angleDirection < Pi)
-                    {
-                        t->setRotation(450 - angleDirection * 180 /Pi);
-                    }
+            if(lineDirection.dy() <= 0) {
+                if(angleDirection < Pi / 2)
+                {
+                    t->setRotation(90 - angleDirection * 180 /Pi);
                 }
-                else {
-                    t->setRotation(90 + angleDirection * 180 /Pi);
+                else if (angleDirection < Pi)
+                {
+                    t->setRotation(450 - angleDirection * 180 /Pi);
                 }
             }
+            else {
+                t->setRotation(90 + angleDirection * 180 /Pi);
+            }
+
         }
     }
 }
 
 void Widget::slotEnemyCreate()
 {
-    Target* target = new Target();
+    if(targets.length() == 10)
+        return;
 
+    Target* target = new Target();
     scene->addItem(target);
 
     targets.append(target);
@@ -176,12 +199,37 @@ void Widget::slotEnemyCreate()
         target->setPos(x,y);
         foundItems = scene->collidingItems(target);
     }
-
 }
 
 void Widget::slotGameOver()
 {
+    timerEnemyCreate->deleteLater();
+    timerEnemyBullet->deleteLater();
 
+    foreach (QGraphicsItem *targ, targets) {
+        Target *t = qgraphicsitem_cast <Target *> (targ);
+        t->setEnemyDestroyed(0);
+        targets.removeOne(targ);
+        t->deleteLater();
+    }
+
+    GameOver* w = new GameOver(this->parentWidget());
+    double time = static_cast<double>(timerElapsed.elapsed()) / 1000;
+    w->setDestroyLabel(enemyDestroy);
+    w->setTimeLabel(time);
+    w->setDestroy(enemyDestroy);
+    w->setTime(time);
+
+    HighScore* db = new HighScore();
+
+    if(!db->checkBase(enemyDestroy, time)){
+        w->showScore();
+    }
+
+    w->show();
+
+    db->deleteLater();
+    delete this;
 }
 
 void Widget::damageTarget(QGraphicsItem *item)
@@ -190,8 +238,10 @@ void Widget::damageTarget(QGraphicsItem *item)
         if(targ == item){
             Target *t = qgraphicsitem_cast <Target *> (targ);
             t->hit(QRandomGenerator::global()->bounded(1,5));
-            if(t->getHealth() == 0)
+            if(t->getHealth() == 0) {
                 targets.removeOne(targ);
+                t->deleteLater();
+            }
         }
     }
 }
@@ -200,3 +250,49 @@ void Widget::nista(QGraphicsItem *item)
 {
     Q_UNUSED(item)
 }
+
+
+//void Widget::keyPressEvent(QKeyEvent *event)
+//{
+//    int speed = hero->getSpeed();
+//    hero->setRotation(normalizeAngleDeg(hero->rotation()));
+
+//    if(event->key() == Qt::Key_A){
+//        hero->setX(hero->x() + speed * sin(hero->rotation() * TwoPi/360 - Pi/2));
+//        hero->setY(hero->y() - speed * cos(hero->rotation() * TwoPi/360 - Pi/2));
+
+//        if(!scene->collidingItems(hero).isEmpty()){
+//            hero->setX(hero->x() - speed * sin(hero->rotation() * TwoPi/360 - Pi/2));
+//            hero->setY(hero->y() + speed * cos(hero->rotation() * TwoPi/360 - Pi/2));
+//        }
+//    }
+//    if(event->key() == Qt::Key_D){
+
+//        hero->setX(hero->x() + speed * sin(hero->rotation() * TwoPi/360 + Pi/2));
+//        hero->setY(hero->y() - speed * cos(hero->rotation() * TwoPi/360 + Pi/2));
+
+//        if(!scene->collidingItems(hero).isEmpty()){
+//            hero->setX(hero->x() - speed * sin(hero->rotation() * TwoPi/360 + Pi/2));
+//            hero->setY(hero->y() + speed * cos(hero->rotation() * TwoPi/360 + Pi/2));
+//        }
+//    }
+//    if(event->key() == Qt::Key_W){
+
+//        hero->setX(hero->x() + speed * sin(hero->rotation() * TwoPi/360));
+//        hero->setY(hero->y() - speed * cos(hero->rotation() * TwoPi/360));
+
+//        if(!scene->collidingItems(hero).isEmpty()){
+//            hero->setX(hero->x() - speed * sin(hero->rotation() * TwoPi/360));
+//            hero->setY(hero->y() + speed * cos(hero->rotation() * TwoPi/360));
+//        }
+//    }
+//    if(event->key() == Qt::Key_S){
+//        hero->setX(hero->x() - speed * sin(hero->rotation() * TwoPi/360));
+//        hero->setY(hero->y() + speed * cos(hero->rotation() * TwoPi/360));
+
+//        if(!scene->collidingItems(hero).isEmpty()){
+//            hero->setX(hero->x() + speed * sin(hero->rotation() * TwoPi/360));
+//            hero->setY(hero->y() - speed * cos(hero->rotation() * TwoPi/360));
+//        }
+//    }
+//}

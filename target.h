@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QTimer>
+#include "widget.h"
 
 class Target : public QObject, public QGraphicsItem
 {
@@ -22,11 +23,12 @@ public:
     void hit(int damage);
 
     int getHealth() const;
-
-
     bool getMove() const;
-
     void setMove(bool newMove);
+
+    static int getEnemyDestroyed();
+
+    static void setEnemyDestroyed(int newEnemyDestroyed);
 
 signals:
     void signalHit();
@@ -46,8 +48,11 @@ private:
     int speed;
     bool move;
 
+    static int enemyDestroyed;
+
     void setPosition();
     QTimer* timerGameEnemy;
+
 };
 
 #endif // TARGET_H

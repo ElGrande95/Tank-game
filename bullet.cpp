@@ -24,7 +24,7 @@ Bullet::Bullet(QPointF start, QPointF end,  const int& heroType, QObject* parent
 {
     this->setRotation(0);
     if(heroType == MyHero::typeMyHero)
-        speed = 20;
+        speed = 30;
     else
         speed = 10;
     this->heroType = heroType;

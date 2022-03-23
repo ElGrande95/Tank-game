@@ -12,8 +12,7 @@
 #define Pi 3.14159265358979323846264338327950288419717
 #define TwoPi (2.0 * Pi)
 
-
-static qreal normalizeAngleRadDeg(qreal angle)
+static qreal normalizeAngleDeg(qreal angle)
 {
     while (angle < 0)
         angle += 360;
@@ -22,14 +21,8 @@ static qreal normalizeAngleRadDeg(qreal angle)
     return angle;
 }
 
-static qreal normalizeAngleRad(qreal angle)
-{
-    while (angle < 0)
-        angle += TwoPi;
-    while (angle > TwoPi)
-        angle -= TwoPi;
-    return angle;
-}
+int Target::enemyDestroyed = 0;
+
 
 Target::Target(QObject *parent)
     :QObject(parent), QGraphicsItem()
@@ -46,7 +39,6 @@ Target::Target(QObject *parent)
     timerGameEnemy->start(10);
 
     connect(this, &Target::signalHit, this, &Target::slotEnemyFocus);
-
 }
 
 Target::~Target()
@@ -67,6 +59,16 @@ QPainterPath Target::shape() const
          << QPoint(4, -15) << QPoint(4, -20) << QPoint(-3, -20) << QPoint(-3, -15);
     path.addPolygon(poly);
     return path;
+}
+
+void Target::setEnemyDestroyed(int newEnemyDestroyed)
+{
+    enemyDestroyed = newEnemyDestroyed;
+}
+
+int Target::getEnemyDestroyed()
+{
+    return enemyDestroyed;
 }
 
 void Target::setMove(bool newMove)
@@ -122,11 +124,12 @@ void Target::slotGameEnemy()
         QList<QGraphicsItem *> foundItems = scene()->collidingItems(this);
         foreach(QGraphicsItem *item, foundItems)
         {
-            if(item->type() == type())
-                break;
+//            if(item->type() == type())
+//                break;
 
-            this->setRotation(normalizeAngleRadDeg(this->rotation()));
-            if(item->type() != Bullet::typeBullet && item->type() != Explosion::typeExplosion)
+            this->setRotation(normalizeAngleDeg(this->rotation()));
+
+            if(item->type() != Bullet::typeBullet && item->type() != type() && item->type() != Explosion::typeExplosion)
             {
                 setPos(mapToParent(0, speed));
                 if(QRandomGenerator::global()->bounded(2))
@@ -164,6 +167,7 @@ void Target::hit(int damage)
         this->deleteLater();
         QPoint point = QPoint(this->pos().x() + 10, this->pos().y() + 10);
         scene()->addItem(new TargetDestroy(point));
+        enemyDestroyed++;
     }
 
     emit signalHit();

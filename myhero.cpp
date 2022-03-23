@@ -12,8 +12,7 @@
 #define Pi 3.14159265358979323846264338327950288419717
 #define TwoPi (2.0 * Pi)
 
-
-static qreal normalizeAngleRadDeg(qreal angle)
+static qreal normalizeAngleDeg(qreal angle)
 {
     while (angle < 0)
         angle += 360;
@@ -21,8 +20,6 @@ static qreal normalizeAngleRadDeg(qreal angle)
         angle -= 360;
     return angle;
 }
-
-
 
 static qreal normalizeAngleRad(qreal angle)
 {
@@ -192,7 +189,6 @@ void MyHero::damage(int dmg)
 
         emit signalGameOver();
     }
-    this->update(QRectF(-20,-20,40,40));
 
     emit signalDamage();
 }
@@ -201,7 +197,7 @@ void MyHero::damage(int dmg)
 void MyHero::keyPressEvent(QKeyEvent *event)
 {
     int speed = this->getSpeed();
-    this->setRotation(normalizeAngleRadDeg(this->rotation()));
+    this->setRotation(normalizeAngleDeg(this->rotation()));
 
     if(event->key() == Qt::Key_A){
         this->setX(this->x() + speed * sin(this->rotation() * TwoPi/360 - Pi/2));
