@@ -26,8 +26,8 @@
   <widget class="QPushButton" name="menuButton">
    <property name="geometry">
     <rect>
-     <x>429</x>
-     <y>540</y>
+     <x>430</x>
+     <y>530</y>
      <width>150</width>
      <height>50</height>
     </rect>
@@ -79,7 +79,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>16</pointsize>
+     <pointsize>19</pointsize>
     </font>
    </property>
    <property name="contextMenuPolicy">

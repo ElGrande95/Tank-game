@@ -23,7 +23,7 @@ void HighScore::deleteLastFromBase()
 
         indicator++;
 
-        if(indicator == 10) {
+        if(indicator == 12) {
             username = query.value(0).toString();
             destroy = query.value(1).toInt();
             time = query.value(2).toDouble();
@@ -63,7 +63,7 @@ bool HighScore::checkBase(int destroy, double time)
     while (query.next()) {
         indicator++;
 
-        if(indicator == 10){
+        if(indicator == 12){
 
             if ( query.value(1).toInt() < destroy || (query.value(1).toInt() == destroy && query.value(2).toDouble() < time))
             {
@@ -73,7 +73,7 @@ bool HighScore::checkBase(int destroy, double time)
             }
         }
     }
-    if(indicator < 10)
+    if(indicator < 12)
         return true;
 
     return false;

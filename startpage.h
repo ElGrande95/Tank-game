@@ -20,6 +20,8 @@ private slots:
 
     void on_exitButton_clicked();
 
+    void on_highscoreButton_clicked();
+
 private:
     Ui::StartPage *ui;
 };

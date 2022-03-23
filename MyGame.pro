@@ -14,6 +14,7 @@ SOURCES += \
     explosion.cpp \
     gameover.cpp \
     highscore.cpp \
+    highscoretable.cpp \
     main.cpp \
     myhero.cpp \
     myscene.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     explosion.h \
     gameover.h \
     highscore.h \
+    highscoretable.h \
     myhero.h \
     myscene.h \
     startpage.h \
@@ -37,6 +39,7 @@ HEADERS += \
 
 FORMS += \
     gameover.ui \
+    highscoretable.ui \
     startpage.ui \
     widget.ui
 

@@ -46,6 +46,14 @@ void GameOver::setTime(double newTime)
 void GameOver::showScore()
 {
     ui->tableView->setModel(db->modelBase());
+    for(int i=0; i<3; i++) {
+        ui->tableView->setColumnWidth(i,180);
+    }
+
+    for(int i=0; i<12; i++) {
+        ui->tableView->setRowHeight(i,39);
+    }
+
     ui->topTen->hide();
 }
 

@@ -3,5 +3,6 @@
         <file>Images/target.png</file>
         <file>Images/explosion.png</file>
         <file>Images/targetDestroy.png</file>
+        <file>Images/tank.jpg</file>
     </qresource>
 </RCC>

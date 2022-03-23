@@ -17,11 +17,19 @@
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>50</y>
-      <width>300</width>
-      <height>100</height>
+      <x>10</x>
+      <y>10</y>
+      <width>280</width>
+      <height>90</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>32</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="text">
      <string>Start</string>
@@ -31,15 +39,41 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>200</y>
+      <y>480</y>
       <width>300</width>
-      <height>100</height>
+      <height>81</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>32</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Exit</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="highscoreButton">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>10</y>
+      <width>280</width>
+      <height>90</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>32</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Highscore</string>
+    </property>
+   </widget>
+   <zorder>startButton</zorder>
+   <zorder>highscoreButton</zorder>
+   <zorder>exitButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
