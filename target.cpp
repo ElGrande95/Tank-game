@@ -8,6 +8,7 @@
 #include "explosion.h"
 #include "barrier.h"
 #include "myhero.h"
+#include "wall.h"
 
 #define Pi 3.14159265358979323846264338327950288419717
 #define TwoPi (2.0 * Pi)
@@ -21,14 +22,13 @@ static qreal normalizeAngleDeg(qreal angle)
     return angle;
 }
 
-int Target::enemyDestroyed = 0;
 
 
 Target::Target(QObject *parent)
     :QObject(parent), QGraphicsItem()
 {
     this->setRotation(QRandomGenerator::global()->bounded(360));
-    speed = 1;
+    speed = 2;
     move = true;
 
     health = QRandomGenerator::global()->bounded(15,25);
@@ -54,21 +54,8 @@ QRectF Target::boundingRect() const
 QPainterPath Target::shape() const
 {
     QPainterPath path;
-    QPolygonF poly;
-    poly << QPoint(-15, -15) << QPoint(-15, 20)  << QPoint(20, 20)<< QPoint(20, -15)
-         << QPoint(4, -15) << QPoint(4, -20) << QPoint(-3, -20) << QPoint(-3, -15);
-    path.addPolygon(poly);
+    path.addRect(QRectF(-20,-20,40,40));
     return path;
-}
-
-void Target::setEnemyDestroyed(int newEnemyDestroyed)
-{
-    enemyDestroyed = newEnemyDestroyed;
-}
-
-int Target::getEnemyDestroyed()
-{
-    return enemyDestroyed;
 }
 
 void Target::setMove(bool newMove)
@@ -83,14 +70,14 @@ bool Target::getMove() const
 
 void Target::setPosition()
 {
-    if(x() < 50)
-        setX(50);
-    else if (x() > 450)
-        setX(450);
-    else if(y() < 50)
-        setY(50);
-    else if (y() > 450)
-        setY(450);
+    if(x() < 60)
+        setX(60);
+    else if (x() > 440)
+        setX(440);
+    else if(y() < 60)
+        setY(60);
+    else if (y() > 440)
+        setY(440);
 }
 
 void Target::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -124,30 +111,91 @@ void Target::slotGameEnemy()
         QList<QGraphicsItem *> foundItems = scene()->collidingItems(this);
         foreach(QGraphicsItem *item, foundItems)
         {
-//            if(item->type() == type())
-//                break;
-
             this->setRotation(normalizeAngleDeg(this->rotation()));
 
-            if(item->type() != Bullet::typeBullet && item->type() != type() && item->type() != Explosion::typeExplosion)
+            if(item->type() == Barrier::typeBarrier)
             {
-                setPos(mapToParent(0, speed));
-                if(QRandomGenerator::global()->bounded(2))
+                if(item->pos().x() > this->pos().x())
                 {
-                    setRotation(rotation() + 87 + QRandomGenerator::global()->bounded(10));
-                    if(!scene()->collidingItems(this).isEmpty())
-                        setRotation(rotation() - 180  - QRandomGenerator::global()->bounded(10));
+                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    setX(210);
+                }
+                else if (item->pos().x() + 20 < this->pos().x())
+                {
+                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    setX(290);
+                }
+                else if(item->pos().y() < this->pos().y())
+                {
+                    if(this->rotation() < 180)
+                    {
+                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                    else
+                    {
+                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                    setY(pos().y() - 20);
                 }
                 else
                 {
-                    setRotation(rotation() - 87  - QRandomGenerator::global()->bounded(10));
-                    if(!scene()->collidingItems(this).isEmpty())
-                        setRotation(rotation() + 180  + QRandomGenerator::global()->bounded(10));
+                    if(this->rotation() < 90)
+                    {
+                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                    else
+                    {
+                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                }
+                setY(pos().y() + 20);
+            }
+
+            else if(item->type() == Wall::typeWall)
+            {
+
+                if(item->pos().x() == 0)
+                {
+                    //left
+                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+
+                }
+                else if(item->pos().x() == 480 && item->pos().y() == 20)
+                {
+                    //right
+                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+
+                }
+                else if(item->pos().x() == 500)
+                {
+                    //top
+
+                    if(this->rotation() < 90)
+                    {
+                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                    else
+                    {
+                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                }
+                else if(item->pos().x() == 480 && item->pos().y() == 480)
+                {
+                   //bottom
+
+                    if(this->rotation() < 180)
+                    {
+                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
+                    else
+                    {
+                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    }
                 }
 
                 setPosition();
-                break;
             }
+            break;
         }
     }
 }
@@ -167,7 +215,7 @@ void Target::hit(int damage)
         this->deleteLater();
         QPoint point = QPoint(this->pos().x() + 10, this->pos().y() + 10);
         scene()->addItem(new TargetDestroy(point));
-        enemyDestroyed++;
+        emit signalDestroy();
     }
 
     emit signalHit();

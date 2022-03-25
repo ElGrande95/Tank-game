@@ -21,6 +21,7 @@ SOURCES += \
     startpage.cpp \
     target.cpp \
     targetdestroy.cpp \
+    wall.cpp \
     widget.cpp
 
 HEADERS += \
@@ -35,6 +36,7 @@ HEADERS += \
     startpage.h \
     target.h \
     targetdestroy.h \
+    wall.h \
     widget.h
 
 FORMS += \

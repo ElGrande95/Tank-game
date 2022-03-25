@@ -26,12 +26,9 @@ public:
     bool getMove() const;
     void setMove(bool newMove);
 
-    static int getEnemyDestroyed();
-
-    static void setEnemyDestroyed(int newEnemyDestroyed);
-
 signals:
     void signalHit();
+    void signalDestroy();
 
 private slots:
     void slotGameEnemy();
@@ -47,8 +44,6 @@ private:
     int maxHealth;
     int speed;
     bool move;
-
-    static int enemyDestroyed;
 
     void setPosition();
     QTimer* timerGameEnemy;

@@ -9,6 +9,7 @@
 #include "barrier.h"
 #include "target.h"
 #include <QElapsedTimer>
+#include "wall.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }

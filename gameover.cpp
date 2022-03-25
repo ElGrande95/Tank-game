@@ -50,6 +50,7 @@ void GameOver::setTime(double newTime)
 void GameOver::showScore()
 {
     ui->tableView->setModel(db->modelBase());
+
     for(int i=0; i<ui->tableView->model()->columnCount(); i++) {
         ui->tableView->setColumnWidth(i,182);
     }

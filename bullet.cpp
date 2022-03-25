@@ -115,7 +115,7 @@ void Bullet::slotTimerBullet()
             scene()->addItem(new Explosion(point));
             if(item->type() == MyHero::typeMyHero) {
                 MyHero *h = qgraphicsitem_cast <MyHero *> (item);
-                h->damage(QRandomGenerator::global()->bounded(1,5));
+                h->damage(QRandomGenerator::global()->bounded(1));
             }
             this->deleteLater();
         }

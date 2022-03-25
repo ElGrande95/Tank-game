@@ -11,17 +11,7 @@
 #define Pi 3.14159265358979323846264338327950288419717
 #define TwoPi (2.0 * Pi)
 
-//static qreal normalizeAngleDeg(qreal angle)
-//{
-//    while (angle < 0)
-//        angle += 360;
-//    while (angle >= 360)
-//        angle -= 360;
-//    return angle;
-//}
-
 QList<QGraphicsItem *> Widget::targets;
-
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -30,7 +20,8 @@ Widget::Widget(QWidget *parent)
     this->resize(600,600);
     this->setFixedSize(600,600);
 
-    enemyDestroy = 0;
+    enemyDestroy = -1;
+
     ui->setupUi(this);
     scene = new MyScene();
     ui->graphicsView->setScene(scene);
@@ -45,21 +36,34 @@ Widget::Widget(QWidget *parent)
     bgImages = bgImages.scaled(600, 600);
 
     ui->graphicsView->setStyleSheet("QGraphicsView { background-image: url(:/Imgs/Images/battle.jpg) 500 500;"
-                                 "color: white;"
-                                 "opacity: 200;"
-                                 "font: bold 24px;};");
+                                    "color: white;"
+                                    "opacity: 200;"
+                                    "font: bold 24px;};");
 
-    scene->addRect(0,0,500,20,QPen(Qt::NoPen),QBrush(Qt::gray));
-    scene->addRect(0,0,20,500,QPen(Qt::NoPen),QBrush(Qt::gray));
-    scene->addRect(0,480,500,20,QPen(Qt::NoPen),QBrush(Qt::gray));
-    scene->addRect(480,0,20,500,QPen(Qt::NoPen),QBrush(Qt::gray));
-    
-    ui->label->setStyleSheet("QLabel { background-color: gray;};");
+    Wall* wallLeft = new Wall();
+    wallLeft->setPos(0,0);
+    scene->addItem(wallLeft);
+
+    Wall* wallRight = new Wall();
+    wallRight->setPos(480,20);
+    scene->addItem(wallRight);
+
+    Wall* wallTop = new Wall();
+    wallTop->setPos(500,0);
+    wallTop->setRotation(90);
+    scene->addItem(wallTop);
+
+    Wall* wallBottom = new Wall();
+    wallBottom->setPos(480,480);
+    wallBottom->setRotation(90);
+    scene->addItem(wallBottom);
 
     barrier = new Barrier();
     barrier->setPos(240,100);
     scene->addItem(barrier);
     
+    ui->label->setStyleSheet("QLabel { background-color: gray;};");
+
     QPixmap* pixmap = new QPixmap(":/Imgs/Images/target.png");
     QCursor cursor = QCursor(pixmap->scaled(20,20));
     ui->graphicsView->setCursor(cursor);
@@ -79,6 +83,7 @@ Widget::Widget(QWidget *parent)
     Target* target = new Target();
     scene->addItem(target);
     targets.append(target);
+    connect(target, &Target::signalDestroy, this, &Widget::setLabelDestroyed);
 
     target->setRotation(QRandomGenerator::global()->bounded(360));
     int x = QRandomGenerator::global()->bounded(275, 425);
@@ -120,6 +125,8 @@ void Widget::setLabelHealth()
 
 void Widget::setLabelDestroyed()
 {
+    enemyDestroy++;
+
     QFont f = QFont();
     f.setPixelSize(32);
     ui->enemyDestroy->setFont(f);
@@ -148,15 +155,11 @@ void Widget::slotEnemyBullet()
         Bullet *bullet = new Bullet(QPointF(xStart, yStart), QPointF(xEnd, yEnd), t->type());
         bullet->setCallbackFunc(nista);
         scene->addItem(bullet);
-
-        enemyDestroy = t->getEnemyDestroyed();
-        setLabelDestroyed();
     }
 }
 
 void Widget::slotEnemysFire(QPointF point)
 {
-
     foreach(QGraphicsItem *targ, targets) {
         Target *t = qgraphicsitem_cast <Target *> (targ);
 
@@ -185,7 +188,7 @@ void Widget::slotEnemysFire(QPointF point)
 
 void Widget::slotEnemyCreate()
 {
-    if(targets.length() == 10)
+    if(targets.length() == 1)
         return;
 
     Target* target = new Target();
@@ -209,6 +212,8 @@ void Widget::slotEnemyCreate()
         target->setPos(x,y);
         foundItems = scene->collidingItems(target);
     }
+
+    connect(target, &Target::signalDestroy, this, &Widget::setLabelDestroyed);
 }
 
 void Widget::slotGameOver()
@@ -218,22 +223,22 @@ void Widget::slotGameOver()
 
     foreach (QGraphicsItem *targ, targets) {
         Target *t = qgraphicsitem_cast <Target *> (targ);
-        t->setEnemyDestroyed(0);
         targets.removeOne(targ);
         t->deleteLater();
     }
 
     GameOver* w = new GameOver(this->parentWidget());
     double time = static_cast<double>(timerElapsed.elapsed()) / 1000;
-    w->setDestroyLabel(enemyDestroy);
     w->setTimeLabel(time);
-    w->setDestroy(enemyDestroy);
     w->setTime(time);
+    w->setDestroyLabel(enemyDestroy);
+    w->setDestroy(enemyDestroy);
 
     HighScore* db = new HighScore();
 
     if(!db->checkBase(enemyDestroy, time)){
         w->hideUserScore();
+
     }
 
     w->show();
