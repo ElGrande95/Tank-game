@@ -41,11 +41,21 @@ Widget::Widget(QWidget *parent)
     scene->setSceneRect(0,0,500,500);
     scene->setFocus();
 
-    scene->addRect(0,0,500,20,QPen(Qt::NoPen),QBrush(Qt::darkGray));
-    scene->addRect(0,0,20,500,QPen(Qt::NoPen),QBrush(Qt::darkGray));
-    scene->addRect(0,480,500,20,QPen(Qt::NoPen),QBrush(Qt::darkGray));
-    scene->addRect(480,0,20,500,QPen(Qt::NoPen),QBrush(Qt::darkGray));
+    QPixmap bgImages(":/Imgs/Images/tank2.jpeg");
+    bgImages = bgImages.scaled(600, 600);
+
+    ui->graphicsView->setStyleSheet("QGraphicsView { background-image: url(:/Imgs/Images/battle.jpg) 500 500;"
+                                 "color: white;"
+                                 "opacity: 200;"
+                                 "font: bold 24px;};");
+
+    scene->addRect(0,0,500,20,QPen(Qt::NoPen),QBrush(Qt::gray));
+    scene->addRect(0,0,20,500,QPen(Qt::NoPen),QBrush(Qt::gray));
+    scene->addRect(0,480,500,20,QPen(Qt::NoPen),QBrush(Qt::gray));
+    scene->addRect(480,0,20,500,QPen(Qt::NoPen),QBrush(Qt::gray));
     
+    ui->label->setStyleSheet("QLabel { background-color: gray;};");
+
     barrier = new Barrier();
     barrier->setPos(240,100);
     scene->addItem(barrier);
@@ -223,7 +233,7 @@ void Widget::slotGameOver()
     HighScore* db = new HighScore();
 
     if(!db->checkBase(enemyDestroy, time)){
-        w->showScore();
+        w->hideUserScore();
     }
 
     w->show();

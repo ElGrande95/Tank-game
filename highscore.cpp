@@ -79,7 +79,7 @@ bool HighScore::checkBase(int destroy, double time)
     return false;
 }
 
-QSqlQueryModel* HighScore::modelBase() const
+QStandardItemModel* HighScore::modelBase() const
 {
     QSqlQueryModel *model = new QSqlQueryModel;
     model->setQuery("SELECT * FROM highscore "
@@ -88,7 +88,21 @@ QSqlQueryModel* HighScore::modelBase() const
     model->setHeaderData(1, Qt::Horizontal, tr("Destroy"));
     model->setHeaderData(2, Qt::Horizontal, tr("Time"));
 
-    return model;
+    QStandardItemModel *modd=new QStandardItemModel();
+
+    for(int i=0; i < model->columnCount(); i++)
+        for(int j=0; j < model->rowCount(); j++) {
+            QStandardItem *item= new QStandardItem();
+                    item->setText(model->index(j,i).data().toString());
+                    item->setTextAlignment(Qt::AlignCenter);
+                    modd->setItem(j,i,item);
+        }
+
+    modd->setHeaderData(0, Qt::Horizontal, tr("Username"));
+    modd->setHeaderData(1, Qt::Horizontal, tr("Destroy"));
+    modd->setHeaderData(2, Qt::Horizontal, tr("Time"));
+
+    return modd;
 
 }
 

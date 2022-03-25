@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
+#include <QStandardItemModel>
 
 class HighScore : public QObject
 {
@@ -14,7 +15,7 @@ public:
     void deleteLastFromBase();
     void insertInBase(const QString& username, int destroy, double time);
     bool checkBase(int destroy, double time);
-    QSqlQueryModel* modelBase() const;
+    QStandardItemModel* modelBase() const;
 
     void connectClose();
     bool connectOpen();

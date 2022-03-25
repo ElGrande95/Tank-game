@@ -10,6 +10,9 @@ StartPage::StartPage(QWidget *parent) :
     ui(new Ui::StartPage)
 {
 
+    this->resize(600,600);
+    this->setFixedSize(600,600);
+
     QPixmap bgImages(":/Imgs/Images/tank.jpg");
     bgImages = bgImages.scaled(600, 600);
     QPalette bgPalette = this->palette();

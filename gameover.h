@@ -24,6 +24,8 @@ public:
     void setTime(double newTime);
 
     void showScore();
+    void setPage();
+    void hideUserScore();
 
 private slots:
     void on_menuButton_clicked();
