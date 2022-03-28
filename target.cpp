@@ -9,6 +9,7 @@
 #include "barrier.h"
 #include "myhero.h"
 #include "wall.h"
+#include "myhero.h"
 
 #define Pi 3.14159265358979323846264338327950288419717
 #define TwoPi (2.0 * Pi)
@@ -21,7 +22,6 @@ static qreal normalizeAngleDeg(qreal angle)
         angle -= 360;
     return angle;
 }
-
 
 
 Target::Target(QObject *parent)
@@ -80,6 +80,54 @@ void Target::setPosition()
         setY(440);
 }
 
+void Target::changeDirection(QGraphicsItem* item)
+{
+    setPos(mapToParent(0, speed));
+
+    if(item->pos().x() >= this->pos().x())
+    {
+        //levo
+        setRotation(360 - this->rotation());
+        setX(200);
+    }
+    else if (item->pos().x() + 20 <= this->pos().x())
+    {
+        //desno
+        setRotation(360 - this->rotation());
+        setX(300);
+    }
+
+    else if(item->pos().y() < this->pos().y())
+    {
+        //dole
+
+        if(this->rotation() < 90)
+        {
+            setRotation(180 - this->rotation());
+        }
+        else if(this->rotation() >270)
+        {
+            setRotation(540 - this->rotation());
+        }
+        setY(pos().y() + 30);
+    }
+    else
+    {
+        //gore
+
+        if(this->rotation() > 90 && this->rotation() < 180)
+        {
+            setRotation(180 - this->rotation());
+        }
+        else if(this->rotation() <= 270 && this->rotation() >= 180)
+        {
+            setRotation(540 - this->rotation());
+        }
+
+        setY(pos().y() - 30);
+    }
+}
+
 void Target::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     QRectF rect1 = QRectF(-15, -15, 31, 31);
@@ -115,55 +163,23 @@ void Target::slotGameEnemy()
 
             if(item->type() == Barrier::typeBarrier)
             {
-                if(item->pos().x() > this->pos().x())
-                {
-                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
-                    setX(210);
-                }
-                else if (item->pos().x() + 20 < this->pos().x())
-                {
-                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
-                    setX(290);
-                }
-                else if(item->pos().y() < this->pos().y())
-                {
-                    if(this->rotation() < 180)
-                    {
-                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
-                    }
-                    else
-                    {
-                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
-                    }
-                    setY(pos().y() - 20);
-                }
-                else
-                {
-                    if(this->rotation() < 90)
-                    {
-                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
-                    }
-                    else
-                    {
-                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
-                    }
-                }
-                setY(pos().y() + 20);
+                changeDirection(item);
             }
 
             else if(item->type() == Wall::typeWall)
             {
+                setPos(mapToParent(0, speed));
 
                 if(item->pos().x() == 0)
                 {
                     //left
-                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    setRotation(360 - this->rotation());
 
                 }
                 else if(item->pos().x() == 480 && item->pos().y() == 20)
                 {
                     //right
-                    setRotation(360 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                    setRotation(360 - this->rotation());
 
                 }
                 else if(item->pos().x() == 500)
@@ -172,30 +188,36 @@ void Target::slotGameEnemy()
 
                     if(this->rotation() < 90)
                     {
-                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                        setRotation(180 - this->rotation());
                     }
                     else
                     {
-                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                        setRotation(540 - this->rotation());
                     }
                 }
                 else if(item->pos().x() == 480 && item->pos().y() == 480)
                 {
-                   //bottom
+                    //bottom
 
                     if(this->rotation() < 180)
                     {
-                        setRotation(180 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                        setRotation(180 - this->rotation());
                     }
                     else
                     {
-                        setRotation(540 - this->rotation() + QRandomGenerator::global()->bounded(1,5));
+                        setRotation(540 - this->rotation());
                     }
                 }
 
                 setPosition();
             }
-            break;
+
+            else if(item->type() == MyHero::typeMyHero)
+            {
+                MyHero *hero = qgraphicsitem_cast <MyHero *> (item);
+                hero->damage(100);
+                hit(100);
+            }
         }
     }
 }

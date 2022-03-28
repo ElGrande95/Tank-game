@@ -1,6 +1,7 @@
 #include "barrier.h"
 #include "myhero.h"
 #include "target.h"
+#include "wall.h"
 
 Barrier::Barrier(QObject *parent)
     : QObject(parent), QGraphicsItem()
@@ -43,22 +44,19 @@ QPainterPath Barrier::shape() const
 
 void Barrier::slotBarrier()
 {
-    QList<QGraphicsItem *> foundItems = this->collidingItems();
-    foreach (QGraphicsItem *item, foundItems) {
-        if (item->type() == MyHero::typeMyHero || item->type() == Target::typeTarget)
-            directionDown = !directionDown;
-    }
-
-
-    if(mapToParent(x(),y()).y() == 900)
-        directionDown = false;
-    else if(mapToParent(x(),y()).y() == 120)
-        directionDown = true;
-
     if(directionDown)
         this->setPos(this->x(), this->y() + 2);
     else
         this->setPos(this->x(), this->y() - 2);
+
+    QPointF currPoint = pos();
+    QList<QGraphicsItem *> foundItems = this->collidingItems();
+    foreach (QGraphicsItem *item, foundItems) {
+        if (item->type() == MyHero::typeMyHero || item->type() == Target::typeTarget || item->type() == Wall::typeWall) {
+            directionDown = !directionDown;
+            setPos(currPoint);
+        }
+    }
 }
 
 int Barrier::type() const {

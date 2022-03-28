@@ -37,16 +37,21 @@ private:
     MyHero* hero;
     Barrier* barrier;
     int enemyDestroy;
+    int numberEnemy;
 
     QElapsedTimer timerElapsed;
 
     QTimer* timerEnemyBullet;
     QTimer* timerEnemyCreate;
+    QTimer* timerGameOver;
+
 
     static QList<QGraphicsItem *> targets;
 
     static void damageTarget(QGraphicsItem* item);
     static void nista(QGraphicsItem* item);
+
+    void buildWalls();
 
 private slots:
     void slotHeroBullet(QPointF start, QPointF end);
@@ -54,6 +59,7 @@ private slots:
     void slotEnemysFire(QPointF point);
     void slotEnemyCreate();
     void slotGameOver();
+    void slotTimerGameOver();
 
 };
 #endif // WIDGET_H

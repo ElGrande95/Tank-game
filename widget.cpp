@@ -21,6 +21,7 @@ Widget::Widget(QWidget *parent)
     this->setFixedSize(600,600);
 
     enemyDestroy = -1;
+    numberEnemy = 10;
 
     ui->setupUi(this);
     scene = new MyScene();
@@ -40,29 +41,9 @@ Widget::Widget(QWidget *parent)
                                     "opacity: 200;"
                                     "font: bold 24px;};");
 
-    Wall* wallLeft = new Wall();
-    wallLeft->setPos(0,0);
-    scene->addItem(wallLeft);
-
-    Wall* wallRight = new Wall();
-    wallRight->setPos(480,20);
-    scene->addItem(wallRight);
-
-    Wall* wallTop = new Wall();
-    wallTop->setPos(500,0);
-    wallTop->setRotation(90);
-    scene->addItem(wallTop);
-
-    Wall* wallBottom = new Wall();
-    wallBottom->setPos(480,480);
-    wallBottom->setRotation(90);
-    scene->addItem(wallBottom);
-
-    barrier = new Barrier();
-    barrier->setPos(240,100);
-    scene->addItem(barrier);
+    buildWalls();
     
-    ui->label->setStyleSheet("QLabel { background-color: gray;};");
+    ui->label->setStyleSheet("QLabel { background-color: darkgray;};");
 
     QPixmap* pixmap = new QPixmap(":/Imgs/Images/target.png");
     QCursor cursor = QCursor(pixmap->scaled(20,20));
@@ -102,10 +83,13 @@ Widget::Widget(QWidget *parent)
 
     timerEnemyBullet = new QTimer();
     connect(timerEnemyBullet, &QTimer::timeout, this, &Widget::slotEnemyBullet);
-    timerEnemyBullet->start(200);
+    timerEnemyBullet->start(300);
 
     connect(hero, &MyHero::signalChangePos, this, &Widget::slotEnemysFire);
-    connect(hero, &MyHero::signalGameOver, this, &Widget::slotGameOver);
+
+    timerGameOver = new QTimer();
+    connect(hero, &MyHero::signalGameOver, this, &Widget::slotTimerGameOver);
+    connect(timerGameOver, &QTimer::timeout, this, &Widget::slotGameOver);
 
     timerElapsed.start();
 }
@@ -188,7 +172,7 @@ void Widget::slotEnemysFire(QPointF point)
 
 void Widget::slotEnemyCreate()
 {
-    if(targets.length() == 1)
+    if(targets.length() == numberEnemy)
         return;
 
     Target* target = new Target();
@@ -218,13 +202,14 @@ void Widget::slotEnemyCreate()
 
 void Widget::slotGameOver()
 {
-    timerEnemyCreate->deleteLater();
-    timerEnemyBullet->deleteLater();
+    timerGameOver->deleteLater();
 
     foreach (QGraphicsItem *targ, targets) {
-        Target *t = qgraphicsitem_cast <Target *> (targ);
         targets.removeOne(targ);
-        t->deleteLater();
+    }
+
+    foreach (QGraphicsItem *item, scene->items()) {
+        delete item;
     }
 
     GameOver* w = new GameOver(this->parentWidget());
@@ -238,13 +223,21 @@ void Widget::slotGameOver()
 
     if(!db->checkBase(enemyDestroy, time)){
         w->hideUserScore();
-
     }
 
     w->show();
 
     db->deleteLater();
     delete this;
+}
+
+void Widget::slotTimerGameOver()
+{
+    timerEnemyCreate->deleteLater();
+    timerEnemyBullet->deleteLater();
+
+    timerGameOver->start(1000);
+
 }
 
 void Widget::damageTarget(QGraphicsItem *item)
@@ -255,7 +248,6 @@ void Widget::damageTarget(QGraphicsItem *item)
             t->hit(QRandomGenerator::global()->bounded(1,5));
             if(t->getHealth() == 0) {
                 targets.removeOne(targ);
-                t->deleteLater();
             }
         }
     }
@@ -264,6 +256,31 @@ void Widget::damageTarget(QGraphicsItem *item)
 void Widget::nista(QGraphicsItem *item)
 {
     Q_UNUSED(item)
+}
+
+void Widget::buildWalls()
+{
+    Wall* wallLeft = new Wall();
+    wallLeft->setPos(0,0);
+    scene->addItem(wallLeft);
+
+    Wall* wallRight = new Wall();
+    wallRight->setPos(480,20);
+    scene->addItem(wallRight);
+
+    Wall* wallTop = new Wall();
+    wallTop->setPos(500,0);
+    wallTop->setRotation(90);
+    scene->addItem(wallTop);
+
+    Wall* wallBottom = new Wall();
+    wallBottom->setPos(480,480);
+    wallBottom->setRotation(90);
+    scene->addItem(wallBottom);
+
+    barrier = new Barrier();
+    barrier->setPos(240,100);
+    scene->addItem(barrier);
 }
 
 

@@ -47,6 +47,7 @@ private:
 
     void setPosition();
     QTimer* timerGameEnemy;
+    void changeDirection(QGraphicsItem* item);
 
 };
 
